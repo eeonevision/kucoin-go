@@ -68,6 +68,25 @@ func (c *Kucoin) SetDebug(enable bool) {
 	c.client.debug = enable
 }
 
+// GetUserInfo is used to get the user information at Kucoin along with other meta data.
+func (b *Kucoin) GetUserInfo() (userInfo UserInfo, err error) {
+	r, err := b.client.do("GET", "user/info", nil, true)
+	if err != nil {
+		return
+	}
+	var response interface{}
+	if err = json.Unmarshal(r, &response); err != nil {
+		return
+	}
+	if err = handleErr(response); err != nil {
+		return
+	}
+	var rawRes rawUserInfo
+	err = json.Unmarshal(r, &rawRes)
+	userInfo = rawRes.Data
+	return
+}
+
 // GetSymbols is used to get the all open and available trading markets at Kucoin along with other meta data.
 func (b *Kucoin) GetSymbols() (symbols []Symbol, err error) {
 	r, err := b.client.do("GET", "market/open/symbols", nil, false)

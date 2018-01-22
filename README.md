@@ -35,7 +35,7 @@ func main() {
 | Get coin deposit address | Auth | ✔ |
 | Get balance of coin | Auth | ✔ |
 | Create an order | Auth | ✔ |
-| Get user info |  |
+| Get user info | Auth | ✔ |
 | Create withdrawal apply |  |
 | Cancel withdrawal |  |
 | List deposit & withdrawal records |  |
