@@ -36,10 +36,10 @@ func main() {
 | Get balance of coin | Auth | ✔ |
 | Create an order | Auth | ✔ |
 | Get user info | Auth | ✔ |
+| List active orders | Auth | ✔ |
 | Create withdrawal apply |  |
 | Cancel withdrawal |  |
 | List deposit & withdrawal records |  |
-| List active orders |  |
 | Cancel orders |  |
 | Cancel all orders |  |
 | List dealt orders |  |
