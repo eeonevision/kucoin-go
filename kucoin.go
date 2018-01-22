@@ -202,6 +202,26 @@ func (b *Kucoin) GetCoinDepositAddress(c string) (coinDepositAddress CoinDeposit
 	return
 }
 
+// ListActiveOrders is used to get the information about active orders at Kucoin along with other meta data.
+// Symbol is required parameter, and side (or type of order) may be empty.
+func (b *Kucoin) ListActiveOrders(symbol string, side string) (activeOrders ActiveOrders, err error) {
+	r, err := b.client.do("GET", fmt.Sprintf("order/active?symbol=%s&type=%s", strings.ToUpper(symbol), strings.ToUpper(side)), nil, true)
+	if err != nil {
+		return
+	}
+	var response interface{}
+	if err = json.Unmarshal(r, &response); err != nil {
+		return
+	}
+	if err = handleErr(response); err != nil {
+		return
+	}
+	var rawRes rawActiveOrders
+	err = json.Unmarshal(r, &rawRes)
+	activeOrders = rawRes.Data
+	return
+}
+
 // Create is used to create order at Kucoin along with other meta data.
 func (b *Kucoin) CreateOrder(symbol, side string, price, amount float64) (orderOid string, err error) {
 	payload := make(map[string]string)
