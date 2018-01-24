@@ -203,9 +203,18 @@ func (b *Kucoin) GetCoinDepositAddress(c string) (coinDepositAddress CoinDeposit
 }
 
 // ListActiveOrders is used to get the information about active orders at Kucoin along with other meta data.
-// Symbol is required parameter, and side (or type of order) may be empty.
+// Symbol is required parameter, and side (or type of order in kucoin docs) may be empty.
 func (b *Kucoin) ListActiveOrders(symbol string, side string) (activeOrders ActiveOrders, err error) {
-	r, err := b.client.do("GET", fmt.Sprintf("order/active?symbol=%s&type=%s", strings.ToUpper(symbol), strings.ToUpper(side)), nil, true)
+	if len(symbol) < 1 {
+		return activeOrders, fmt.Errorf("The symbol is required")
+	}
+	payload := map[string]string{}
+	payload["symbol"] = strings.ToUpper(symbol)
+	if len(side) < 1 {
+		payload["side"] = strings.ToUpper(side)
+	}
+
+	r, err := b.client.do("GET", "order/active", payload, true)
 	if err != nil {
 		return
 	}
@@ -243,5 +252,45 @@ func (b *Kucoin) CreateOrder(symbol, side string, price, amount float64) (orderO
 	var rawRes rawOrder
 	err = json.Unmarshal(r, &rawRes)
 	orderOid = rawRes.Data.OrderOid
+	return
+}
+
+// AccountHistory is used to get the information about list deposit & withdrawal at Kucoin along with other meta data.
+// Coin, Side (type in Kucoin docs.) and Status are required parameters. Limit and page may be empty.
+// Example:
+// - Coin = KCS
+// - Side = DEPOSIT | WITHDRAW
+// - Status = FINISHED | CANCEL | PENDING
+func (b *Kucoin) AccountHistory(coin, side, status string, limit, page int) (accountHistory AccountHistory, err error) {
+	if len(coin) < 1 || len(side) < 1 || len(status) < 1 {
+		return accountHistory, fmt.Errorf("The not all required parameters are presented")
+	}
+	payload := map[string]string{}
+	payload["type"] = side
+	payload["status"] = status
+	if limit == 0 {
+		payload["limit"] = fmt.Sprintf("%v", 1000)
+	} else {
+		payload["limit"] = fmt.Sprintf("%v", limit)
+	}
+	if page != 0 {
+		payload["page"] = fmt.Sprintf("%v", page)
+	}
+
+	r, err := b.client.do("GET", fmt.Sprintf(
+		"account/%s/wallet/records", strings.ToUpper(coin)), payload, true)
+	if err != nil {
+		return
+	}
+	var response interface{}
+	if err = json.Unmarshal(r, &response); err != nil {
+		return
+	}
+	if err = handleErr(response); err != nil {
+		return
+	}
+	var rawRes AccountHistory
+	err = json.Unmarshal(r, &rawRes)
+	accountHistory = rawRes
 	return
 }

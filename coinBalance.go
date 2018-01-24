@@ -1,9 +1,9 @@
 package kucoin
 
 type CoinBalance struct {
-	CoinType      string `json:"coinType"`
-	Balance       int    `json:"balance"`
-	FreezeBalance int    `json:"freezeBalance"`
+	CoinType      string  `json:"coinType"`
+	Balance       float64 `json:"balance"`
+	FreezeBalance float64 `json:"freezeBalance"`
 }
 
 type rawCoinBalances struct {
