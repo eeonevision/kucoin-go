@@ -38,7 +38,7 @@ func main() {
 | Get user info | Auth | ✔ |
 | List active orders | Auth | ✔ |
 | List deposit & withdrawal records | Auth | ✔ |
-| List dealt orders (Specific and Merged) | Auth | ✔ |
+| List dealt orders (Both Specific and Merged) | Auth | ✔ |
 | Create withdrawal apply |  |
 | Cancel withdrawal |  |
 | Cancel orders |  |
