@@ -64,8 +64,8 @@ type Kucoin struct {
 }
 
 // set enable/disable http request/response dump
-func (c *Kucoin) SetDebug(enable bool) {
-	c.client.debug = enable
+func (b *Kucoin) SetDebug(enable bool) {
+	b.client.debug = enable
 }
 
 // GetUserInfo is used to get the user information at Kucoin along with other meta data.
@@ -256,7 +256,7 @@ func (b *Kucoin) CreateOrder(symbol, side string, price, amount float64) (orderO
 }
 
 // AccountHistory is used to get the information about list deposit & withdrawal at Kucoin along with other meta data.
-// Coin, Side (type in Kucoin docs.) and Status are required parameters. Limit and page may be empty.
+// Coin, Side (type in Kucoin docs.) and Status are required parameters. Limit and page may be zeros.
 // Example:
 // - Coin = KCS
 // - Side = DEPOSIT | WITHDRAW
@@ -292,5 +292,89 @@ func (b *Kucoin) AccountHistory(coin, side, status string, limit, page int) (acc
 	var rawRes AccountHistory
 	err = json.Unmarshal(r, &rawRes)
 	accountHistory = rawRes
+	return
+}
+
+// ListSpecificDealtOrders is used to get the information about dealt orders for specific symbol at Kucoin along with other meta data.
+// Symbol, Side (type in Kucoin docs.) are required parameters. Limit and page may be zeros.
+// Example:
+// - Symbol = KCS-BTC
+// - Side = BUY | SELL
+func (b *Kucoin) ListSpecificDealtOrders(symbol, side string, limit, page int) (specificDealtOrders SpecificDealtOrder, err error) {
+	if len(symbol) < 1 || len(side) < 1 {
+		return specificDealtOrders, fmt.Errorf("The not all required parameters are presented")
+	}
+	payload := map[string]string{}
+	payload["symbol"] = symbol
+	payload["type"] = side
+	if limit == 0 {
+		payload["limit"] = fmt.Sprintf("%v", 1000)
+	} else {
+		payload["limit"] = fmt.Sprintf("%v", limit)
+	}
+	if page != 0 {
+		payload["page"] = fmt.Sprintf("%v", page)
+	}
+
+	r, err := b.client.do("GET", "deal-orders", payload, true)
+	if err != nil {
+		return
+	}
+	var response interface{}
+	if err = json.Unmarshal(r, &response); err != nil {
+		return
+	}
+	if err = handleErr(response); err != nil {
+		return
+	}
+	var rawRes SpecificDealtOrder
+	err = json.Unmarshal(r, &rawRes)
+	specificDealtOrders = rawRes
+	return
+}
+
+// ListMergedDealtOrders is used to get the information about dealt orders for all symbols at Kucoin along with other meta data.
+// All parameters are optional. Timestamp must be in milliseconds from Unix epoch.
+func (b *Kucoin) ListMergedDealtOrders(symbol, side string, limit, page int, since, before int64) (mergedDealtOrders MergedDealtOrder, err error) {
+	payload := map[string]string{}
+	payload["symbol"] = symbol
+	payload["type"] = side
+	if len(symbol) > 1 {
+		payload["symbol"] = symbol
+	}
+	if len(side) > 1 {
+		payload["type"] = side
+	}
+	if (limit == 0 || limit > 100) && len(symbol) > 1 {
+		payload["limit"] = fmt.Sprintf("%v", 100)
+	} else if (limit == 0 || limit > 20) && len(symbol) > 1 {
+		payload["limit"] = fmt.Sprintf("%v", 20)
+	} else {
+		payload["limit"] = fmt.Sprintf("%v", limit)
+	}
+	if page != 0 {
+		payload["page"] = fmt.Sprintf("%v", page)
+	}
+	if since != 0 {
+		payload["since"] = fmt.Sprintf("%v", since)
+	}
+	if before != 0 {
+		payload["before"] = fmt.Sprintf("%v", before)
+	}
+
+	r, err := b.client.do("GET", "order/dealt", payload, true)
+	if err != nil {
+		return
+	}
+	var response interface{}
+	if err = json.Unmarshal(r, &response); err != nil {
+		return
+	}
+	if err = handleErr(response); err != nil {
+		return
+	}
+	var rawRes MergedDealtOrder
+	err = json.Unmarshal(r, &rawRes)
+	mergedDealtOrders = rawRes
 	return
 }
