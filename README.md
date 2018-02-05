@@ -39,11 +39,11 @@ func main() {
 | List active orders | Auth | ✔ |
 | List deposit & withdrawal records | Auth | ✔ |
 | List dealt orders (Both Specific and Merged) | Auth | ✔ |
+| Order details | Auth | ✔ |
 | Create withdrawal apply |  |
 | Cancel withdrawal |  |
 | Cancel orders |  |
 | Cancel all orders |  |
-| Order details |  |
 | Order books |  |
 
 ## Donate

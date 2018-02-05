@@ -289,9 +289,9 @@ func (b *Kucoin) AccountHistory(coin, side, status string, limit, page int) (acc
 	if err = handleErr(response); err != nil {
 		return
 	}
-	var rawRes AccountHistory
+	var rawRes rawAccountHistory
 	err = json.Unmarshal(r, &rawRes)
-	accountHistory = rawRes
+	accountHistory = rawRes.Data
 	return
 }
 
@@ -327,9 +327,9 @@ func (b *Kucoin) ListSpecificDealtOrders(symbol, side string, limit, page int) (
 	if err = handleErr(response); err != nil {
 		return
 	}
-	var rawRes SpecificDealtOrder
+	var rawRes rawSpecificDealtOrder
 	err = json.Unmarshal(r, &rawRes)
-	specificDealtOrders = rawRes
+	specificDealtOrders = rawRes.Data
 	return
 }
 
@@ -373,8 +373,49 @@ func (b *Kucoin) ListMergedDealtOrders(symbol, side string, limit, page int, sin
 	if err = handleErr(response); err != nil {
 		return
 	}
-	var rawRes MergedDealtOrder
+	var rawRes rawMergedDealtOrder
 	err = json.Unmarshal(r, &rawRes)
-	mergedDealtOrders = rawRes
+	mergedDealtOrders = rawRes.Data
+	return
+}
+
+// OrderDetails is used to get the information about orders for specific symbol at Kucoin along with other meta data.
+// Symbol, Side (type in Kucoin docs.) are required parameters.
+// Limit may be zero, and not greater than 20. Page may be zero and by default is equal to 1.
+// Example:
+// - Symbol = KCS-BTC
+// - Side = BUY | SELL
+func (b *Kucoin) OrderDetails(symbol, side, orderOid string, limit, page int) (orderDetails OrderDetails, err error) {
+	if len(symbol) < 1 || len(side) < 1 {
+		return orderDetails, fmt.Errorf("The not all required parameters are presented")
+	}
+	payload := map[string]string{}
+	payload["symbol"] = symbol
+	payload["type"] = side
+	if limit == 0 {
+		payload["limit"] = fmt.Sprintf("%v", 20)
+	} else {
+		payload["limit"] = fmt.Sprintf("%v", limit)
+	}
+	if page == 0 {
+		payload["page"] = fmt.Sprintf("%v", 1)
+	} else {
+		payload["page"] = fmt.Sprintf("%v", page)
+	}
+
+	r, err := b.client.do("GET", "order/detail", payload, true)
+	if err != nil {
+		return
+	}
+	var response interface{}
+	if err = json.Unmarshal(r, &response); err != nil {
+		return
+	}
+	if err = handleErr(response); err != nil {
+		return
+	}
+	var rawRes rawOrderDetails
+	err = json.Unmarshal(r, &rawRes)
+	orderDetails = rawRes.Data
 	return
 }

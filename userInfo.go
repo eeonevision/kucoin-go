@@ -7,7 +7,7 @@ type UserInfo struct {
 	Language                 string      `json:"language"`
 	Currency                 string      `json:"currency"`
 	Oid                      string      `json:"oid"`
-	BaseFeeRate              int         `json:"baseFeeRate"`
+	BaseFeeRate              float64     `json:"baseFeeRate"`
 	HasCredential            bool        `json:"hasCredential"`
 	CredentialNumber         string      `json:"credentialNumber"`
 	PhoneValidated           bool        `json:"phoneValidated"`
