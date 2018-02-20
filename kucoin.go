@@ -255,8 +255,9 @@ func (b *Kucoin) CreateOrder(symbol, side string, price, amount float64) (orderO
 	return
 }
 
-// AccountHistory is used to get the information about list deposit & withdrawal at Kucoin along with other meta data.
-// Coin, Side (type in Kucoin docs.) and Status are required parameters. Limit and page may be zeros.
+// AccountHistory is used to get the information about list deposit & withdrawal
+// at Kucoin along with other meta data. Coin, Side (type in Kucoin docs.)
+// and Status are required parameters. Limit and page may be zeros.
 // Example:
 // - Coin = KCS
 // - Side = DEPOSIT | WITHDRAW
@@ -333,7 +334,8 @@ func (b *Kucoin) ListSpecificDealtOrders(symbol, side string, limit, page int) (
 	return
 }
 
-// ListMergedDealtOrders is used to get the information about dealt orders for all symbols at Kucoin along with other meta data.
+// ListMergedDealtOrders is used to get the information about dealt orders for
+// all symbols at Kucoin along with other meta data.
 // All parameters are optional. Timestamp must be in milliseconds from Unix epoch.
 func (b *Kucoin) ListMergedDealtOrders(symbol, side string, limit, page int, since, before int64) (mergedDealtOrders MergedDealtOrder, err error) {
 	payload := map[string]string{}
@@ -417,5 +419,75 @@ func (b *Kucoin) OrderDetails(symbol, side, orderOid string, limit, page int) (o
 	var rawRes rawOrderDetails
 	err = json.Unmarshal(r, &rawRes)
 	orderDetails = rawRes.Data
+	return
+}
+
+// CreateWithdrawalApply is used to create withdrawal for specific coin
+// at Kucoin along with other meta data.
+// coin, address and amount are required parameters.
+// Example:
+// - coin = KCS
+// - address = example_address
+// - amount 0.68
+// Result:
+// - Nothing.
+func (b *Kucoin) CreateWithdrawalApply(coin, address string, amount float64) (withdrawalApply Withdrawal, err error) {
+	if len(coin) < 1 || len(address) < 1 || amount == 0 {
+		return withdrawalApply, fmt.Errorf("The not all required parameters are presented")
+	}
+	payload := map[string]string{}
+	payload["coin"] = coin
+	payload["address"] = address
+	payload["amount"] = fmt.Sprintf("%v", amount)
+
+	r, err := b.client.do("POST", fmt.Sprintf(
+		"account/%s/withdraw/apply", strings.ToUpper(coin)), payload, true)
+	if err != nil {
+		return
+	}
+	var response interface{}
+	if err = json.Unmarshal(r, &response); err != nil {
+		return
+	}
+	if err = handleErr(response); err != nil {
+		return
+	}
+	var rawRes rawWithdrawal
+	err = json.Unmarshal(r, &rawRes)
+	withdrawalApply = rawRes.Data
+	return
+}
+
+// CancelWithdrawal used to cancel withdrawal for specific coin
+// at Kucoin along with other meta data.
+// coin, txOid are required parameters.
+// Example:
+// - coin = KCS
+// - txOid = example_tx
+// Result:
+// - Nothing.
+func (b *Kucoin) CancelWithdrawal(coin, txOid string) (withdrawal Withdrawal, err error) {
+	if len(coin) < 1 || len(txOid) < 1 {
+		return withdrawal, fmt.Errorf("The not all required parameters are presented")
+	}
+	payload := map[string]string{}
+	payload["coin"] = coin
+	payload["txOid"] = txOid
+
+	r, err := b.client.do("POST", fmt.Sprintf(
+		"account/%s/withdraw/cancel", strings.ToUpper(coin)), payload, true)
+	if err != nil {
+		return
+	}
+	var response interface{}
+	if err = json.Unmarshal(r, &response); err != nil {
+		return
+	}
+	if err = handleErr(response); err != nil {
+		return
+	}
+	var rawRes rawWithdrawal
+	err = json.Unmarshal(r, &rawRes)
+	withdrawal = rawRes.Data
 	return
 }

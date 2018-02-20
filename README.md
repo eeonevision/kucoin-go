@@ -40,8 +40,8 @@ func main() {
 | List deposit & withdrawal records | Auth | ✔ |
 | List dealt orders (Both Specific and Merged) | Auth | ✔ |
 | Order details | Auth | ✔ |
-| Create withdrawal apply |  |
-| Cancel withdrawal |  |
+| Create withdrawal apply | Auth | ✔ |
+| Cancel withdrawal | Auth | ✔ |
 | Cancel orders |  |
 | Cancel all orders |  |
 | Order books |  |
