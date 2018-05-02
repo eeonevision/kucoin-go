@@ -36,7 +36,7 @@ func main() {
 | Get balance of coin | Auth | ✔ |
 | Create an order | Auth | ✔ |
 | Get user info | Auth | ✔ |
-| List active orders | Auth | ✔ |
+| List active orders (list and map) | Auth | ✔ |
 | List deposit & withdrawal records | Auth | ✔ |
 | List dealt orders (Both Specific and Merged) | Auth | ✔ |
 | Order details | Auth | ✔ |
