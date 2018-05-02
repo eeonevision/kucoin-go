@@ -106,6 +106,38 @@ func (b *Kucoin) GetSymbols() (symbols []Symbol, err error) {
 	return
 }
 
+// GetUserSymbols is used to get the all open and available trading markets at Kucoin along with other meta data.
+// The user should be logged to call this method.
+// Filter parameter can be whether 'FAVOURITE' or 'STICK',
+// market and symbol parameters can be any as presented at exchange.
+func (b *Kucoin) GetUserSymbols(market, symbol, filter string) (symbols []Symbol, err error) {
+	payload := map[string]string{}
+	if len(market) > 1 {
+		payload["market"] = market
+	}
+	if len(symbol) > 1 {
+		payload["symbol"] = symbol
+	}
+	if len(filter) > 1 {
+		payload["filter"] = filter
+	}
+	r, err := b.client.do("GET", "market/symbols", payload, true)
+	if err != nil {
+		return
+	}
+	var response interface{}
+	if err = json.Unmarshal(r, &response); err != nil {
+		return
+	}
+	if err = handleErr(response); err != nil {
+		return
+	}
+	var rawRes rawSymbols
+	err = json.Unmarshal(r, &rawRes)
+	symbols = rawRes.Data
+	return
+}
+
 // GetSymbol is used to get the open and available trading market at Kucoin along with other meta data.
 // Trading symbol e.g. KCS-BTC. If not specified then you will get data of all symbols.
 func (b *Kucoin) GetSymbol(market string) (symbol Symbol, err error) {
@@ -204,7 +236,7 @@ func (b *Kucoin) GetCoinDepositAddress(c string) (coinDepositAddress CoinDeposit
 
 // ListActiveOrders is used to get the information about active orders at Kucoin along with other meta data.
 // Symbol is required parameter, and side (or type of order in kucoin docs) may be empty.
-func (b *Kucoin) ListActiveOrders(symbol string, side string) (activeOrders ActiveOrders, err error) {
+func (b *Kucoin) ListActiveOrders(symbol string, side string) (activeOrders ActiveOrder, err error) {
 	if len(symbol) < 1 {
 		return activeOrders, fmt.Errorf("The symbol is required")
 	}
@@ -214,7 +246,7 @@ func (b *Kucoin) ListActiveOrders(symbol string, side string) (activeOrders Acti
 		payload["side"] = strings.ToUpper(side)
 	}
 
-	r, err := b.client.do("GET", "order/active", payload, true)
+	r, err := b.client.do("GET", "order/active-map", payload, true)
 	if err != nil {
 		return
 	}
@@ -225,9 +257,43 @@ func (b *Kucoin) ListActiveOrders(symbol string, side string) (activeOrders Acti
 	if err = handleErr(response); err != nil {
 		return
 	}
-	var rawRes rawActiveOrders
+	var rawRes rawActiveOrder
 	err = json.Unmarshal(r, &rawRes)
 	activeOrders = rawRes.Data
+	return
+}
+
+// OrdersBook is used to get the information about active orders at Kucoin along with other meta data.
+// Symbol is required parameter, geoup and limit may be empty.
+func (b *Kucoin) OrdersBook(symbol string, group, limit int) (ordersBook OrdersBook, err error) {
+	if len(symbol) < 1 {
+		return ordersBook, fmt.Errorf("The symbol is required")
+	}
+	payload := map[string]string{}
+	payload["symbol"] = strings.ToUpper(symbol)
+	if group > 0 {
+		payload["group"] = fmt.Sprintf("%v", group)
+	}
+	if limit == 0 {
+		payload["limit"] = fmt.Sprintf("%v", 1000)
+	} else {
+		payload["limit"] = fmt.Sprintf("%v", limit)
+	}
+
+	r, err := b.client.do("GET", "open/orders", payload, true)
+	if err != nil {
+		return
+	}
+	var response interface{}
+	if err = json.Unmarshal(r, &response); err != nil {
+		return
+	}
+	if err = handleErr(response); err != nil {
+		return
+	}
+	var rawRes rawOrdersBook
+	err = json.Unmarshal(r, &rawRes)
+	ordersBook = rawRes.Data
 	return
 }
 
@@ -238,7 +304,7 @@ func (b *Kucoin) CreateOrder(symbol, side string, price, amount float64) (orderO
 	payload["price"] = strconv.FormatFloat(price, 'f', 8, 64)
 	payload["type"] = strings.ToUpper(side)
 
-	r, err := b.client.do("POST", fmt.Sprintf("order?symbol=%s", strings.ToUpper(symbol)), payload, true)
+	r, err := b.client.do("POST", fmt.Sprintf("%s/order", strings.ToUpper(symbol)), payload, true)
 	if err != nil {
 		return
 	}
@@ -392,6 +458,7 @@ func (b *Kucoin) OrderDetails(symbol, side, orderOid string, limit, page int) (o
 		return orderDetails, fmt.Errorf("The not all required parameters are presented")
 	}
 	payload := map[string]string{}
+	payload["orderOid"] = orderOid
 	payload["symbol"] = symbol
 	payload["type"] = side
 	if limit == 0 {
