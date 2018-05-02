@@ -17,6 +17,8 @@ type Symbol struct {
 	Vol           float64 `json:"vol"`
 	Low           float64 `json:"low,omitempty"`
 	ChangeRate    float64 `json:"changeRate,omitempty"`
+	Stick         bool    `json:"stick,omitempty"`
+	Fav           bool    `json:"fav,omitempty"`
 }
 
 type rawSymbols struct {
