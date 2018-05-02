@@ -234,7 +234,38 @@ func (b *Kucoin) GetCoinDepositAddress(c string) (coinDepositAddress CoinDeposit
 	return
 }
 
-// ListActiveOrders is used to get the information about active orders at Kucoin along with other meta data.
+// ListActiveMapOrders is used to get the information about active orders in user-friendly view
+// at Kucoin along with other meta data.
+// Symbol is required parameter, and side (or type of order in kucoin docs) may be empty.
+func (b *Kucoin) ListActiveMapOrders(symbol string, side string) (activeMapOrders ActiveMapOrder, err error) {
+	if len(symbol) < 1 {
+		return activeMapOrders, fmt.Errorf("The symbol is required")
+	}
+	payload := map[string]string{}
+	payload["symbol"] = strings.ToUpper(symbol)
+	if len(side) > 1 {
+		payload["side"] = strings.ToUpper(side)
+	}
+
+	r, err := b.client.do("GET", "order/active-map", payload, true)
+	if err != nil {
+		return
+	}
+	var response interface{}
+	if err = json.Unmarshal(r, &response); err != nil {
+		return
+	}
+	if err = handleErr(response); err != nil {
+		return
+	}
+	var rawRes rawActiveMapOrder
+	err = json.Unmarshal(r, &rawRes)
+	activeMapOrders = rawRes.Data
+	return
+}
+
+// ListActiveOrders is used to get the information about active orders in array mode
+// at Kucoin along with other meta data.
 // Symbol is required parameter, and side (or type of order in kucoin docs) may be empty.
 func (b *Kucoin) ListActiveOrders(symbol string, side string) (activeOrders ActiveOrder, err error) {
 	if len(symbol) < 1 {
@@ -242,11 +273,11 @@ func (b *Kucoin) ListActiveOrders(symbol string, side string) (activeOrders Acti
 	}
 	payload := map[string]string{}
 	payload["symbol"] = strings.ToUpper(symbol)
-	if len(side) < 1 {
+	if len(side) > 1 {
 		payload["side"] = strings.ToUpper(side)
 	}
 
-	r, err := b.client.do("GET", "order/active-map", payload, true)
+	r, err := b.client.do("GET", "order/active", payload, true)
 	if err != nil {
 		return
 	}
@@ -405,8 +436,6 @@ func (b *Kucoin) ListSpecificDealtOrders(symbol, side string, limit, page int) (
 // All parameters are optional. Timestamp must be in milliseconds from Unix epoch.
 func (b *Kucoin) ListMergedDealtOrders(symbol, side string, limit, page int, since, before int64) (mergedDealtOrders MergedDealtOrder, err error) {
 	payload := map[string]string{}
-	payload["symbol"] = symbol
-	payload["type"] = side
 	if len(symbol) > 1 {
 		payload["symbol"] = symbol
 	}
@@ -415,7 +444,7 @@ func (b *Kucoin) ListMergedDealtOrders(symbol, side string, limit, page int, sin
 	}
 	if (limit == 0 || limit > 100) && len(symbol) > 1 {
 		payload["limit"] = fmt.Sprintf("%v", 100)
-	} else if (limit == 0 || limit > 20) && len(symbol) > 1 {
+	} else if (limit == 0 || limit > 20) && len(symbol) < 1 {
 		payload["limit"] = fmt.Sprintf("%v", 20)
 	} else {
 		payload["limit"] = fmt.Sprintf("%v", limit)
@@ -454,7 +483,7 @@ func (b *Kucoin) ListMergedDealtOrders(symbol, side string, limit, page int, sin
 // - Symbol = KCS-BTC
 // - Side = BUY | SELL
 func (b *Kucoin) OrderDetails(symbol, side, orderOid string, limit, page int) (orderDetails OrderDetails, err error) {
-	if len(symbol) < 1 || len(side) < 1 {
+	if len(symbol) < 1 || len(side) < 1 || len(orderOid) < 1 {
 		return orderDetails, fmt.Errorf("The not all required parameters are presented")
 	}
 	payload := map[string]string{}

@@ -1,6 +1,6 @@
 package kucoin
 
-type ActiveOrder struct {
+type ActiveMapOrder struct {
 	SELL []struct {
 		Oid           string      `json:"oid"`
 		Type          string      `json:"type"`
@@ -29,10 +29,24 @@ type ActiveOrder struct {
 	} `json:"BUY"`
 }
 
+type rawActiveMapOrder struct {
+	Success   bool           `json:"success"`
+	Code      string         `json:"code"`
+	Msg       string         `json:"msg,omitempty"`
+	Timestamp int64          `json:"timestamp,omitempty"`
+	Data      ActiveMapOrder `json:"data"`
+}
+
+type ActiveOrder struct {
+	SELL [][]interface{} `json:"SELL"`
+	BUY  [][]interface{} `json:"BUY"`
+}
+
 type rawActiveOrder struct {
+	Comment   string      `json:"_comment"`
 	Success   bool        `json:"success"`
 	Code      string      `json:"code"`
-	Msg       string      `json:"msg"`
-	Timestamp int64       `json:"timestamp"`
+	Msg       string      `json:"msg,omitempty"`
+	Timestamp int64       `json:"timestamp,omitempty"`
 	Data      ActiveOrder `json:"data"`
 }
