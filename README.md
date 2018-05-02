@@ -29,9 +29,9 @@ func main() {
 ## Checklist
 | API Resource | Type | Done  |
 | -------------| ----- | ----- |
-| Tick (symbols) | Open    | ✔ |
+| Tick (symbols) | Open | ✔ |
 | Get coin info | Open | ✔ |
-| List coins | Open    | ✔ |
+| List coins | Open | ✔ |
 | Get coin deposit address | Auth | ✔ |
 | Get balance of coin | Auth | ✔ |
 | Create an order | Auth | ✔ |
@@ -42,9 +42,10 @@ func main() {
 | Order details | Auth | ✔ |
 | Create withdrawal apply | Auth | ✔ |
 | Cancel withdrawal | Auth | ✔ |
+| Tick (symbols) for logged user | Auth | ✔ |
+| Order books | Auth | ✔ |
 | Cancel orders |  |
 | Cancel all orders |  |
-| Order books |  |
 
 ## Donate
 Your **★Star** will be best donation to my work)
