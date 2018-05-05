@@ -1,5 +1,6 @@
 package kucoin
 
+// OrderDetails structs represents kucoin data model.
 type OrderDetails struct {
 	CoinType         string  `json:"coinType"`
 	DealValueTotal   float64 `json:"dealValueTotal"`

@@ -1,5 +1,6 @@
 package kucoin
 
+// UserInfo struct represents kucoin data model.
 type UserInfo struct {
 	ReferrerCode             string      `json:"referrer_code"`
 	PhotoCredentialValidated bool        `json:"photoCredentialValidated"`

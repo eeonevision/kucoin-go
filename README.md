@@ -32,20 +32,20 @@ func main() {
 | Tick (symbols) | Open | ✔ |
 | Get coin info | Open | ✔ |
 | List coins | Open | ✔ |
+| Tick (symbols) for logged user | Auth | ✔ |
 | Get coin deposit address | Auth | ✔ |
 | Get balance of coin | Auth | ✔ |
 | Create an order | Auth | ✔ |
 | Get user info | Auth | ✔ |
-| List active orders (list and map) | Auth | ✔ |
+| List active orders (Both map and array) | Auth | ✔ |
 | List deposit & withdrawal records | Auth | ✔ |
 | List dealt orders (Both Specific and Merged) | Auth | ✔ |
 | Order details | Auth | ✔ |
 | Create withdrawal apply | Auth | ✔ |
 | Cancel withdrawal | Auth | ✔ |
-| Tick (symbols) for logged user | Auth | ✔ |
+| Cancel orders | Auth | ✔ |
+| Cancel all orders | Auth | ✔ |
 | Order books | Auth | ✔ |
-| Cancel orders |  |
-| Cancel all orders |  |
 
 ## Donate
 Your **★Star** will be best donation to my work)

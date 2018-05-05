@@ -1,5 +1,6 @@
 package kucoin
 
+// Coin struct represents kucoin data model.
 type Coin struct {
 	WithdrawMinFee    float64     `json:"withdrawMinFee"`
 	WithdrawMinAmount float64     `json:"withdrawMinAmount"`

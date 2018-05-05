@@ -1,4 +1,4 @@
-// Package Kucoin is an implementation of the Kucoin API in Golang.
+// Package kucoin is an implementation of the Kucoin API in Golang.
 package kucoin
 
 import (
@@ -11,31 +11,31 @@ import (
 	"time"
 )
 
+// Kucoin API endpoint.
 const (
-	// Kucoin API endpoint
-	API_BASE   = "https://api.kucoin.com"
-	API_PREFIX = "/v1"
+	APIBase   = "https://api.kucoin.com"
+	APIPrefix = "/v1"
 )
 
-// New returns an instantiated Kucoin struct
+// New returns an instantiated Kucoin struct.
 func New(apiKey, apiSecret string) *Kucoin {
 	client := NewClient(apiKey, apiSecret)
 	return &Kucoin{client}
 }
 
-// NewWithCustomHttpClient returns an instantiated Kucoin struct with custom http client
-func NewWithCustomHttpClient(apiKey, apiSecret string, httpClient *http.Client) *Kucoin {
-	client := NewClientWithCustomHttpConfig(apiKey, apiSecret, httpClient)
+// NewWithCustomHTTPClient returns an instantiated Kucoin struct with custom http client.
+func NewWithCustomHTTPClient(apiKey, apiSecret string, httpClient *http.Client) *Kucoin {
+	client := NewClientWithCustomHTTPConfig(apiKey, apiSecret, httpClient)
 	return &Kucoin{client}
 }
 
-// NewWithCustomTimeout returns an instantiated Kucoin struct with custom timeout
+// NewWithCustomTimeout returns an instantiated Kucoin struct with custom timeout.
 func NewWithCustomTimeout(apiKey, apiSecret string, timeout time.Duration) *Kucoin {
 	client := NewClientWithCustomTimeout(apiKey, apiSecret, timeout)
 	return &Kucoin{client}
 }
 
-// handleErr gets JSON response from livecoin API en deal with error
+// handleErr gets JSON response from livecoin API en deal with error.
 func handleErr(r interface{}) error {
 	switch v := r.(type) {
 	case map[string]interface{}:
@@ -46,24 +46,24 @@ func handleErr(r interface{}) error {
 				errorMessage := error.(map[string]interface{})["message"]
 				return errors.New(errorMessage.(string))
 			default:
-				return fmt.Errorf("I don't know about type %T!\n", v)
+				return fmt.Errorf("don't recognized type %T", v)
 			}
 		}
 	case []interface{}:
 		return nil
 	default:
-		return fmt.Errorf("I don't know about type %T!\n", v)
+		return fmt.Errorf("don't recognized type %T", v)
 	}
 
 	return nil
 }
 
-// Kucoin represent a Kucoin client
+// Kucoin represent a Kucoin client.
 type Kucoin struct {
 	client *client
 }
 
-// set enable/disable http request/response dump
+// SetDebug enables/disables http request/response dump.
 func (b *Kucoin) SetDebug(enable bool) {
 	b.client.debug = enable
 }
@@ -328,7 +328,7 @@ func (b *Kucoin) OrdersBook(symbol string, group, limit int) (ordersBook OrdersB
 	return
 }
 
-// Create is used to create order at Kucoin along with other meta data.
+// CreateOrder is used to create order at Kucoin along with other meta data.
 func (b *Kucoin) CreateOrder(symbol, side string, price, amount float64) (orderOid string, err error) {
 	payload := make(map[string]string)
 	payload["amount"] = strconv.FormatFloat(amount, 'f', 8, 64)
@@ -567,7 +567,6 @@ func (b *Kucoin) CancelWithdrawal(coin, txOid string) (withdrawal Withdrawal, er
 		return withdrawal, fmt.Errorf("The not all required parameters are presented")
 	}
 	payload := map[string]string{}
-	payload["coin"] = coin
 	payload["txOid"] = txOid
 
 	r, err := b.client.do("POST", fmt.Sprintf(
@@ -586,4 +585,56 @@ func (b *Kucoin) CancelWithdrawal(coin, txOid string) (withdrawal Withdrawal, er
 	err = json.Unmarshal(r, &rawRes)
 	withdrawal = rawRes.Data
 	return
+}
+
+// CancelOrder is used to cancel execution of current order at Kucoin along with other meta data.
+// Side (type in Kucoin docs.) and order ID are required parameters. Symbol is optional.
+func (b *Kucoin) CancelOrder(orderOid, side, symbol string) error {
+	if len(side) < 1 || len(orderOid) < 1 {
+		return fmt.Errorf("The not all required parameters are presented")
+	}
+	payload := map[string]string{}
+	payload["orderOid"] = orderOid
+	if len(symbol) > 1 {
+		payload["symbol"] = strings.ToUpper(symbol)
+	}
+	payload["type"] = side
+
+	r, err := b.client.do("POST", "cancel-order", payload, true)
+	if err != nil {
+		return err
+	}
+	var response interface{}
+	if err = json.Unmarshal(r, &response); err != nil {
+		return err
+	}
+	if err = handleErr(response); err != nil {
+		return err
+	}
+	return nil
+}
+
+// CancelAllOrders is used to cancel execution of all orders at Kucoin along with other meta data.
+// Symbol, Side (type in Kucoin docs.) are optional parameters.
+func (b *Kucoin) CancelAllOrders(symbol, side string) error {
+	payload := map[string]string{}
+	if len(symbol) > 1 {
+		payload["symbol"] = strings.ToUpper(symbol)
+	}
+	if len(side) > 1 {
+		payload["type"] = side
+	}
+
+	r, err := b.client.do("POST", "order/cancel-all", payload, true)
+	if err != nil {
+		return err
+	}
+	var response interface{}
+	if err = json.Unmarshal(r, &response); err != nil {
+		return err
+	}
+	if err = handleErr(response); err != nil {
+		return err
+	}
+	return nil
 }

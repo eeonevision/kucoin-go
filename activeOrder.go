@@ -1,5 +1,6 @@
 package kucoin
 
+// ActiveMapOrder struct represents kucoin data model.
 type ActiveMapOrder struct {
 	SELL []struct {
 		Oid           string      `json:"oid"`
@@ -37,6 +38,7 @@ type rawActiveMapOrder struct {
 	Data      ActiveMapOrder `json:"data"`
 }
 
+// ActiveOrder struct represents kucoin data model.
 type ActiveOrder struct {
 	SELL [][]interface{} `json:"SELL"`
 	BUY  [][]interface{} `json:"BUY"`

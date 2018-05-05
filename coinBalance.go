@@ -1,5 +1,6 @@
 package kucoin
 
+// CoinBalance struct represents kucoin data model.
 type CoinBalance struct {
 	CoinType      string  `json:"coinType"`
 	Balance       float64 `json:"balance"`

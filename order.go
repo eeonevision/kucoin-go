@@ -1,5 +1,6 @@
 package kucoin
 
+// Order structs represents kucoin data model.
 type Order struct {
 	OrderOid string `json:"orderOid"`
 }

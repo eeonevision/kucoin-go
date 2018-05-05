@@ -1,5 +1,6 @@
 package kucoin
 
+// AccountHistory struct represents kucoin data model.
 type AccountHistory struct {
 	Datas []struct {
 		Fee             float64     `json:"fee"`

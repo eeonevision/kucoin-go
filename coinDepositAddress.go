@@ -1,5 +1,6 @@
 package kucoin
 
+// CoinDepositAddress struct represents kucoin data model.
 type CoinDepositAddress struct {
 	Oid            string      `json:"oid"`
 	Address        string      `json:"address"`

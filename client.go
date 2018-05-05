@@ -24,13 +24,13 @@ type client struct {
 	debug       bool
 }
 
-// NewClient return a new Kucoin HTTP client
+// NewClient return a new Kucoin HTTP client.
 func NewClient(apiKey, apiSecret string) (c *client) {
 	return &client{apiKey, apiSecret, &http.Client{}, 30 * time.Second, false}
 }
 
-// NewClientWithCustomHttpConfig returns a new Kucoin HTTP client using the predefined http client
-func NewClientWithCustomHttpConfig(apiKey, apiSecret string, httpClient *http.Client) (c *client) {
+// NewClientWithCustomHTTPConfig returns a new Kucoin HTTP client using the predefined http client.
+func NewClientWithCustomHTTPConfig(apiKey, apiSecret string, httpClient *http.Client) (c *client) {
 	timeout := httpClient.Timeout
 	if timeout <= 0 {
 		timeout = 30 * time.Second
@@ -38,7 +38,7 @@ func NewClientWithCustomHttpConfig(apiKey, apiSecret string, httpClient *http.Cl
 	return &client{apiKey, apiSecret, httpClient, timeout, false}
 }
 
-// NewClient returns a new Kucoin HTTP client with custom timeout
+// NewClientWithCustomTimeout returns a new Kucoin HTTP client with custom timeout.
 func NewClientWithCustomTimeout(apiKey, apiSecret string, timeout time.Duration) (c *client) {
 	return &client{apiKey, apiSecret, &http.Client{}, timeout, false}
 }
@@ -69,7 +69,7 @@ func (c client) dumpResponse(r *http.Response) {
 	}
 }
 
-// doTimeoutRequest do a HTTP request with timeout
+// doTimeoutRequest do a HTTP request with timeout.
 func (c *client) doTimeoutRequest(timer *time.Timer, req *http.Request) (*http.Response, error) {
 	// Do the request in the background so we can check the timeout
 	type result struct {
@@ -96,7 +96,7 @@ func (c *client) doTimeoutRequest(timer *time.Timer, req *http.Request) (*http.R
 	}
 }
 
-// do prepare and process HTTP request to Kucoin API
+// do prepare and process HTTP request to Kucoin API.
 /*
 	 *  Example
 	 *  POST parameters：
@@ -114,7 +114,7 @@ func (c *client) do(method string, resource string, payload map[string]string, a
 	if strings.HasPrefix(resource, "http") {
 		rawurl = resource
 	} else {
-		rawurl = fmt.Sprintf("%s%s/%s", API_BASE, API_PREFIX, resource)
+		rawurl = fmt.Sprintf("%s%s/%s", APIBase, APIPrefix, resource)
 	}
 	var formData string
 	if method == "GET" {
@@ -157,7 +157,7 @@ func (c *client) do(method string, resource string, payload map[string]string, a
 		nonce := time.Now().UnixNano() / int64(time.Millisecond)
 		req.Header.Add("KC-API-KEY", c.apiKey)
 		req.Header.Add("KC-API-NONCE", fmt.Sprintf("%v", nonce))
-		req.Header.Add("KC-API-SIGNATURE", c.sign(fmt.Sprintf("%s/%s", API_PREFIX, resource), nonce, formData))
+		req.Header.Add("KC-API-SIGNATURE", c.sign(fmt.Sprintf("%s/%s", APIPrefix, resource), nonce, formData))
 	}
 
 	resp, err := c.doTimeoutRequest(connectTimer, req)

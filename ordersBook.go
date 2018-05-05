@@ -1,5 +1,6 @@
 package kucoin
 
+// OrdersBook struct represents kucoin data model.
 type OrdersBook struct {
 	Comment string      `json:"_comment"`
 	SELL    [][]float64 `json:"SELL"`

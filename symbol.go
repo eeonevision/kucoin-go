@@ -1,5 +1,6 @@
 package kucoin
 
+// Symbol struct represents kucoin data model.
 type Symbol struct {
 	CoinType      string  `json:"coinType"`
 	Trading       bool    `json:"trading"`

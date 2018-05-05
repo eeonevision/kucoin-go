@@ -1,5 +1,6 @@
 package kucoin
 
+// SpecificDealtOrder struct represents kucoin data model.
 type SpecificDealtOrder struct {
 	Datas []struct {
 		Oid       string  `json:"oid"`
@@ -29,6 +30,7 @@ type rawSpecificDealtOrder struct {
 	Data    SpecificDealtOrder `json:"data"`
 }
 
+// MergedDealtOrder struct represents kucoin data model.
 type MergedDealtOrder struct {
 	Total int `json:"total"`
 	Datas []struct {
