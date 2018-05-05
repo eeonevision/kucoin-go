@@ -608,10 +608,7 @@ func (b *Kucoin) CancelOrder(orderOid, side, symbol string) error {
 	if err = json.Unmarshal(r, &response); err != nil {
 		return err
 	}
-	if err = handleErr(response); err != nil {
-		return err
-	}
-	return nil
+	return handleErr(response)
 }
 
 // CancelAllOrders is used to cancel execution of all orders at Kucoin along with other meta data.
@@ -633,8 +630,5 @@ func (b *Kucoin) CancelAllOrders(symbol, side string) error {
 	if err = json.Unmarshal(r, &response); err != nil {
 		return err
 	}
-	if err = handleErr(response); err != nil {
-		return err
-	}
-	return nil
+	return handleErr(response)
 }
