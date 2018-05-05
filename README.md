@@ -1,5 +1,6 @@
 # Kucoin REST-API Golang
 Unofficial [Kucoin API](https://kucoinapidocs.docs.apiary.io/) implementation written on Golang.
+
 [![GoDoc](https://godoc.org/github.com/eeonevision/kucoin-go?status.svg)](https://godoc.org/github.com/eeonevision/kucoin-go)[![Go Report Card](https://goreportcard.com/badge/github.com/eeonevision/kucoin-go)](https://goreportcard.com/report/github.com/eeonevision/kucoin-go)
 
 ## Features
