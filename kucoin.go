@@ -590,17 +590,14 @@ func (b *Kucoin) CancelWithdrawal(coin, txOid string) (withdrawal Withdrawal, er
 // CancelOrder is used to cancel execution of current order at Kucoin along with other meta data.
 // Side (type in Kucoin docs.) and order ID are required parameters. Symbol is optional.
 func (b *Kucoin) CancelOrder(orderOid, side, symbol string) error {
-	if len(side) < 1 || len(orderOid) < 1 {
+	if len(symbol) < 1 || len(side) < 1 || len(orderOid) < 1 {
 		return fmt.Errorf("The not all required parameters are presented")
 	}
 	payload := map[string]string{}
 	payload["orderOid"] = orderOid
-	if len(symbol) > 1 {
-		payload["symbol"] = strings.ToUpper(symbol)
-	}
 	payload["type"] = side
 
-	r, err := b.client.do("POST", "cancel-order", payload, true)
+	r, err := b.client.do("POST", fmt.Sprintf("%s/cancel-order", strings.ToUpper(symbol)), payload, true)
 	if err != nil {
 		return err
 	}
