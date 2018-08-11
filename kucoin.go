@@ -11,7 +11,6 @@ import (
 	"time"
 )
 
-// Kucoin API endpoint.
 const (
 	APIBase   = "https://api.kucoin.com"
 	APIPrefix = "/v1"
@@ -19,19 +18,21 @@ const (
 
 // New returns an instantiated Kucoin struct.
 func New(apiKey, apiSecret string) *Kucoin {
-	client := NewClient(apiKey, apiSecret)
+	client := newClient(apiKey, apiSecret)
 	return &Kucoin{client}
 }
 
-// NewWithCustomHTTPClient returns an instantiated Kucoin struct with custom http client.
-func NewWithCustomHTTPClient(apiKey, apiSecret string, httpClient *http.Client) *Kucoin {
-	client := NewClientWithCustomHTTPConfig(apiKey, apiSecret, httpClient)
+// NewCustomClient returns an instantiated Kucoin struct with custom http client.
+func NewCustomClient(apiKey, apiSecret string, httpClient http.Client) *Kucoin {
+	client := newClient(apiKey, apiSecret)
+	client.httpClient = httpClient
 	return &Kucoin{client}
 }
 
-// NewWithCustomTimeout returns an instantiated Kucoin struct with custom timeout.
-func NewWithCustomTimeout(apiKey, apiSecret string, timeout time.Duration) *Kucoin {
-	client := NewClientWithCustomTimeout(apiKey, apiSecret, timeout)
+// NewCustomTimeout returns an instantiated Kucoin struct with custom timeout.
+func NewCustomTimeout(apiKey, apiSecret string, timeout time.Duration) *Kucoin {
+	client := newClient(apiKey, apiSecret)
+	client.httpClient.Timeout = timeout
 	return &Kucoin{client}
 }
 

@@ -17,55 +17,44 @@ import (
 )
 
 type client struct {
-	apiKey      string
-	apiSecret   string
-	httpClient  *http.Client
-	httpTimeout time.Duration
-	debug       bool
+	apiKey     string
+	apiSecret  string
+	httpClient http.Client
+	debug      bool
 }
 
-// NewClient return a new Kucoin HTTP client.
-func NewClient(apiKey, apiSecret string) (c *client) {
-	return &client{apiKey, apiSecret, &http.Client{}, 30 * time.Second, false}
-}
-
-// NewClientWithCustomHTTPConfig returns a new Kucoin HTTP client using the predefined http client.
-func NewClientWithCustomHTTPConfig(apiKey, apiSecret string, httpClient *http.Client) (c *client) {
-	timeout := httpClient.Timeout
-	if timeout <= 0 {
-		timeout = 30 * time.Second
+func newClient(apiKey, apiSecret string) (c *client) {
+	c = &client{
+		apiKey:    apiKey,
+		apiSecret: apiSecret,
 	}
-	return &client{apiKey, apiSecret, httpClient, timeout, false}
-}
-
-// NewClientWithCustomTimeout returns a new Kucoin HTTP client with custom timeout.
-func NewClientWithCustomTimeout(apiKey, apiSecret string, timeout time.Duration) (c *client) {
-	return &client{apiKey, apiSecret, &http.Client{}, timeout, false}
+	c.httpClient.Timeout = time.Second * 30
+	return
 }
 
 func (c client) dumpRequest(r *http.Request) {
 	if r == nil {
-		log.Print("dumpReq ok: <nil>")
-		return
-	}
-	dump, err := httputil.DumpRequest(r, true)
-	if err != nil {
-		log.Print("dumpReq err:", err)
+		log.Println("dumpReq ok: <nil>")
 	} else {
-		log.Print("dumpReq ok:", string(dump))
+		dump, err := httputil.DumpRequest(r, true)
+		if err != nil {
+			log.Printf("dumpReq err: %s\n", err)
+		} else {
+			log.Printf("dumpReq ok: %s\n", dump)
+		}
 	}
 }
 
 func (c client) dumpResponse(r *http.Response) {
 	if r == nil {
-		log.Print("dumpResponse ok: <nil>")
-		return
-	}
-	dump, err := httputil.DumpResponse(r, true)
-	if err != nil {
-		log.Print("dumpResponse err:", err)
+		log.Println("dumpResponse ok: <nil>")
 	} else {
-		log.Print("dumpResponse ok:", string(dump))
+		dump, err := httputil.DumpResponse(r, true)
+		if err != nil {
+			log.Printf("dumpResponse err: %s\n", err)
+		} else {
+			log.Printf("dumpResponse ok: %s\n", dump)
+		}
 	}
 }
 
@@ -108,8 +97,6 @@ func (c *client) doTimeoutRequest(timer *time.Timer, req *http.Request) (*http.R
 		  e.g. amount=10&price=1.1&type=BUY
 */
 func (c *client) do(method string, resource string, payload map[string]string, authNeeded bool) (response []byte, err error) {
-	connectTimer := time.NewTimer(c.httpTimeout)
-
 	var rawurl string
 	if strings.HasPrefix(resource, "http") {
 		rawurl = resource
@@ -160,7 +147,7 @@ func (c *client) do(method string, resource string, payload map[string]string, a
 		req.Header.Add("KC-API-SIGNATURE", c.sign(fmt.Sprintf("%s/%s", APIPrefix, resource), nonce, formData))
 	}
 
-	resp, err := c.doTimeoutRequest(connectTimer, req)
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return
 	}
