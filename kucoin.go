@@ -52,11 +52,11 @@ func doArgs(args ...string) map[string]string {
 func handleErr(r interface{}) error {
 	switch v := r.(type) {
 	case map[string]interface{}:
-		error := r.(map[string]interface{})["error"]
-		if error != nil {
-			switch v := error.(type) {
+		err := r.(map[string]interface{})["error"]
+		if err != nil {
+			switch v := err.(type) {
 			case map[string]interface{}:
-				errorMessage := error.(map[string]interface{})["message"]
+				errorMessage := err.(map[string]interface{})["message"]
 				return errors.New(errorMessage.(string))
 			default:
 				return fmt.Errorf("don't recognized type %T", v)
