@@ -35,6 +35,19 @@ func NewCustomTimeout(apiKey, apiSecret string, timeout time.Duration) *Kucoin {
 	return &Kucoin{client}
 }
 
+func doArgs(args ...string) map[string]string {
+	m := make(map[string]string)
+	var lastK = ""
+	for i, v := range args {
+		if i&1 == 0 {
+			lastK = v
+		} else {
+			m[lastK] = v
+		}
+	}
+	return m
+}
+
 // handleErr gets JSON response from livecoin API en deal with error.
 func handleErr(r interface{}) error {
 	switch v := r.(type) {
@@ -141,7 +154,9 @@ func (b *Kucoin) GetUserSymbols(market, symbol, filter string) (symbols []Symbol
 // GetSymbol is used to get the open and available trading market at Kucoin along with other meta data.
 // Trading symbol e.g. KCS-BTC. If not specified then you will get data of all symbols.
 func (b *Kucoin) GetSymbol(market string) (symbol Symbol, err error) {
-	r, err := b.client.do("GET", "open/tick?symbol="+strings.ToUpper(market), nil, false)
+	r, err := b.client.do("GET",
+		"open/tick", doArgs("symbol", strings.ToUpper(market)), false,
+	)
 	if err != nil {
 		return
 	}
@@ -179,7 +194,9 @@ func (b *Kucoin) GetCoins() (coins []Coin, err error) {
 
 // GetCoin is used to get the open and available trading coin at Kucoin along with other meta data.
 func (b *Kucoin) GetCoin(c string) (coin Coin, err error) {
-	r, err := b.client.do("GET", "market/open/coin-info?coin="+strings.ToUpper(c), nil, false)
+	r, err := b.client.do(
+		"GET", "market/open/coin-info", doArgs("coin", strings.ToUpper(c)), false,
+	)
 	if err != nil {
 		return
 	}
@@ -239,9 +256,9 @@ func (b *Kucoin) GetCoinDepositAddress(c string) (coinDepositAddress CoinDeposit
 // Symbol is required parameter, and side (or type of order in kucoin docs) may be empty.
 func (b *Kucoin) ListActiveMapOrders(symbol string, side string) (activeMapOrders ActiveMapOrder, err error) {
 	if len(symbol) < 1 {
-		return activeMapOrders, fmt.Errorf("The symbol is required")
+		return activeMapOrders, fmt.Errorf("Symbol is required")
 	}
-	payload := map[string]string{}
+	payload := make(map[string]string)
 	payload["symbol"] = strings.ToUpper(symbol)
 	if len(side) > 1 {
 		payload["side"] = strings.ToUpper(side)
@@ -271,7 +288,7 @@ func (b *Kucoin) ListActiveOrders(symbol string, side string) (activeOrders Acti
 	if len(symbol) < 1 {
 		return activeOrders, fmt.Errorf("The symbol is required")
 	}
-	payload := map[string]string{}
+	payload := make(map[string]string)
 	payload["symbol"] = strings.ToUpper(symbol)
 	if len(side) > 1 {
 		payload["side"] = strings.ToUpper(side)
