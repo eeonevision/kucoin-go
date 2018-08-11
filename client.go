@@ -71,10 +71,7 @@ func (c client) dumpResponse(r *http.Response) {
 		  e.g. amount=10&price=1.1&type=BUY
 */
 func (c *client) do(method, resource string, payload map[string]string, authNeeded bool) ([]byte, error) {
-	var (
-		req  *http.Request
-		body *strings.Reader
-	)
+	var req *http.Request
 
 	Url, err := url.Parse(kucoinUrl)
 	if err != nil {
@@ -87,15 +84,18 @@ func (c *client) do(method, resource string, payload map[string]string, authNeed
 			q.Set(key, value)
 		}
 		Url.RawQuery = q.Encode()
+		req, err = http.NewRequest("GET", Url.String(), nil)
 	} else {
 		var postValues url.Values
 		for key, value := range payload {
 			postValues.Set(key, value)
 		}
-		body = strings.NewReader(postValues.Encode())
+		req, err = http.NewRequest(
+			method, Url.String(), strings.NewReader(
+				postValues.Encode(),
+			),
+		)
 	}
-
-	req, err = http.NewRequest(method, Url.String(), body)
 	if err != nil {
 		return nil, err
 	}
