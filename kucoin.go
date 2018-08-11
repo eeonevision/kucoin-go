@@ -12,8 +12,7 @@ import (
 )
 
 const (
-	APIBase   = "https://api.kucoin.com"
-	APIPrefix = "/v1"
+	kucoinUrl = "https://api.kucoin.com/v1/"
 )
 
 // New returns an instantiated Kucoin struct.
