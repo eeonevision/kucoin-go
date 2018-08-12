@@ -11,39 +11,52 @@ import (
 	"time"
 )
 
-// Kucoin API endpoint.
 const (
-	APIBase   = "https://api.kucoin.com"
-	APIPrefix = "/v1"
+	kucoinUrl = "https://api.kucoin.com/v1/"
 )
 
 // New returns an instantiated Kucoin struct.
 func New(apiKey, apiSecret string) *Kucoin {
-	client := NewClient(apiKey, apiSecret)
+	client := newClient(apiKey, apiSecret)
 	return &Kucoin{client}
 }
 
-// NewWithCustomHTTPClient returns an instantiated Kucoin struct with custom http client.
-func NewWithCustomHTTPClient(apiKey, apiSecret string, httpClient *http.Client) *Kucoin {
-	client := NewClientWithCustomHTTPConfig(apiKey, apiSecret, httpClient)
+// NewCustomClient returns an instantiated Kucoin struct with custom http client.
+func NewCustomClient(apiKey, apiSecret string, httpClient http.Client) *Kucoin {
+	client := newClient(apiKey, apiSecret)
+	client.httpClient = httpClient
 	return &Kucoin{client}
 }
 
-// NewWithCustomTimeout returns an instantiated Kucoin struct with custom timeout.
-func NewWithCustomTimeout(apiKey, apiSecret string, timeout time.Duration) *Kucoin {
-	client := NewClientWithCustomTimeout(apiKey, apiSecret, timeout)
+// NewCustomTimeout returns an instantiated Kucoin struct with custom timeout.
+func NewCustomTimeout(apiKey, apiSecret string, timeout time.Duration) *Kucoin {
+	client := newClient(apiKey, apiSecret)
+	client.httpClient.Timeout = timeout
 	return &Kucoin{client}
+}
+
+func doArgs(args ...string) map[string]string {
+	m := make(map[string]string)
+	var lastK = ""
+	for i, v := range args {
+		if i&1 == 0 {
+			lastK = v
+		} else {
+			m[lastK] = v
+		}
+	}
+	return m
 }
 
 // handleErr gets JSON response from livecoin API en deal with error.
 func handleErr(r interface{}) error {
 	switch v := r.(type) {
 	case map[string]interface{}:
-		error := r.(map[string]interface{})["error"]
-		if error != nil {
-			switch v := error.(type) {
+		err := r.(map[string]interface{})["error"]
+		if err != nil {
+			switch v := err.(type) {
 			case map[string]interface{}:
-				errorMessage := error.(map[string]interface{})["message"]
+				errorMessage := err.(map[string]interface{})["message"]
 				return errors.New(errorMessage.(string))
 			default:
 				return fmt.Errorf("don't recognized type %T", v)
@@ -141,7 +154,9 @@ func (b *Kucoin) GetUserSymbols(market, symbol, filter string) (symbols []Symbol
 // GetSymbol is used to get the open and available trading market at Kucoin along with other meta data.
 // Trading symbol e.g. KCS-BTC. If not specified then you will get data of all symbols.
 func (b *Kucoin) GetSymbol(market string) (symbol Symbol, err error) {
-	r, err := b.client.do("GET", "open/tick?symbol="+strings.ToUpper(market), nil, false)
+	r, err := b.client.do("GET",
+		"open/tick", doArgs("symbol", strings.ToUpper(market)), false,
+	)
 	if err != nil {
 		return
 	}
@@ -179,7 +194,9 @@ func (b *Kucoin) GetCoins() (coins []Coin, err error) {
 
 // GetCoin is used to get the open and available trading coin at Kucoin along with other meta data.
 func (b *Kucoin) GetCoin(c string) (coin Coin, err error) {
-	r, err := b.client.do("GET", "market/open/coin-info?coin="+strings.ToUpper(c), nil, false)
+	r, err := b.client.do(
+		"GET", "market/open/coin-info", doArgs("coin", strings.ToUpper(c)), false,
+	)
 	if err != nil {
 		return
 	}
@@ -239,9 +256,9 @@ func (b *Kucoin) GetCoinDepositAddress(c string) (coinDepositAddress CoinDeposit
 // Symbol is required parameter, and side (or type of order in kucoin docs) may be empty.
 func (b *Kucoin) ListActiveMapOrders(symbol string, side string) (activeMapOrders ActiveMapOrder, err error) {
 	if len(symbol) < 1 {
-		return activeMapOrders, fmt.Errorf("The symbol is required")
+		return activeMapOrders, fmt.Errorf("Symbol is required")
 	}
-	payload := map[string]string{}
+	payload := make(map[string]string)
 	payload["symbol"] = strings.ToUpper(symbol)
 	if len(side) > 1 {
 		payload["side"] = strings.ToUpper(side)
@@ -271,7 +288,7 @@ func (b *Kucoin) ListActiveOrders(symbol string, side string) (activeOrders Acti
 	if len(symbol) < 1 {
 		return activeOrders, fmt.Errorf("The symbol is required")
 	}
-	payload := map[string]string{}
+	payload := make(map[string]string)
 	payload["symbol"] = strings.ToUpper(symbol)
 	if len(side) > 1 {
 		payload["side"] = strings.ToUpper(side)
