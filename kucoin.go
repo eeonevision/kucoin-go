@@ -365,6 +365,44 @@ func (b *Kucoin) CreateOrder(symbol, side string, price, amount float64) (orderO
 	}
 	var rawRes rawOrder
 	err = json.Unmarshal(r, &rawRes)
+	if err != nil {
+		return
+	}
+	if !rawRes.Success {
+		err = errors.New(string(r))
+		return
+	}
+	orderOid = rawRes.Data.OrderOid
+	return
+}
+
+// CreateOrderByString is used to create order at Kucoin along with other meta data. This ByString version is fix precise problem.
+func (b *Kucoin) CreateOrderByString(symbol, side string, price, amount string) (orderOid string, err error) {
+	payload := make(map[string]string)
+	payload["amount"] = amount
+	payload["price"] = price
+	payload["type"] = strings.ToUpper(side)
+
+	r, err := b.client.do("POST", fmt.Sprintf("%s/order", strings.ToUpper(symbol)), payload, true)
+	if err != nil {
+		return
+	}
+	var response interface{}
+	if err = json.Unmarshal(r, &response); err != nil {
+		return
+	}
+	if err = handleErr(response); err != nil {
+		return
+	}
+	var rawRes rawOrder
+	err = json.Unmarshal(r, &rawRes)
+	if err != nil {
+		return
+	}
+	if !rawRes.Success {
+		err = errors.New(string(r))
+		return
+	}
 	orderOid = rawRes.Data.OrderOid
 	return
 }

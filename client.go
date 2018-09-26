@@ -78,6 +78,7 @@ func (c *client) do(method, resource string, payload map[string]string, authNeed
 		return nil, err
 	}
 	Url.Path = path.Join(Url.Path, resource)
+	queryString := ""
 	if method == "GET" {
 		q := Url.Query()
 		for key, value := range payload {
@@ -85,14 +86,16 @@ func (c *client) do(method, resource string, payload map[string]string, authNeed
 		}
 		Url.RawQuery = q.Encode()
 		req, err = http.NewRequest("GET", Url.String(), nil)
+		queryString = Url.Query().Encode()
 	} else {
-		var postValues url.Values
+		postValues := url.Values{}
 		for key, value := range payload {
 			postValues.Set(key, value)
 		}
+		queryString = postValues.Encode()
 		req, err = http.NewRequest(
 			method, Url.String(), strings.NewReader(
-				postValues.Encode(),
+				queryString,
 			),
 		)
 	}
@@ -115,7 +118,7 @@ func (c *client) do(method, resource string, payload map[string]string, authNeed
 		req.Header.Add("KC-API-NONCE", fmt.Sprintf("%v", nonce))
 		req.Header.Add(
 			"KC-API-SIGNATURE", c.sign(
-				Url.Path, Url.Query().Encode(), nonce,
+				Url.Path, queryString, nonce,
 			),
 		)
 	}
