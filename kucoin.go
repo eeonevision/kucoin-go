@@ -376,8 +376,9 @@ func (b *Kucoin) CreateOrder(symbol, side string, price, amount float64) (orderO
 	return
 }
 
-// CreateOrderByString is used to create order at Kucoin along with other meta data. This ByString version is fix precise problem.
-func (b *Kucoin) CreateOrderByString(symbol, side string, price, amount string) (orderOid string, err error) {
+// CreateOrderByString is used to create order at Kucoin along with other meta data.
+// This ByString version is fix precise problem.
+func (b *Kucoin) CreateOrderByString(symbol, side, price, amount string) (orderOid string, err error) {
 	payload := make(map[string]string)
 	payload["amount"] = amount
 	payload["price"] = price
