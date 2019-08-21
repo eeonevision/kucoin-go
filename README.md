@@ -1,5 +1,6 @@
 # Kucoin REST-API Golang
 [![GoDoc](https://godoc.org/github.com/eeonevision/kucoin-go?status.svg)](https://godoc.org/github.com/eeonevision/kucoin-go) [![Go Report Card](https://goreportcard.com/badge/github.com/eeonevision/kucoin-go)](https://goreportcard.com/report/github.com/eeonevision/kucoin-go)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Feeonevision%2Fkucoin-go.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Feeonevision%2Fkucoin-go?ref=badge_shield)
 
 Unofficial [Kucoin API](https://kucoinapidocs.docs.apiary.io/) implementation written on Golang.
 
@@ -51,3 +52,7 @@ func main() {
 
 ## Donate
 Your **★Star** will be best donation to my work)
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Feeonevision%2Fkucoin-go.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Feeonevision%2Fkucoin-go?ref=badge_large)
